@@ -257,3 +257,7 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* TikTok icon uses the same accent treatment as the other social links. */
+.icon-tiktok { color: var(--orange-bright); }
+.icon-tiktok svg { fill: currentColor; }
