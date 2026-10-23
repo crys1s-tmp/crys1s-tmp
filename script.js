@@ -1,20 +1,6 @@
-// Небольшие интерактивные функции. Основной сайт работает и без JavaScript.
+// Small interactive effects. The site still works without JavaScript.
 document.addEventListener("DOMContentLoaded", () => {
-  // Не даём случайно перейти по незаполненным ссылкам (#).
-  document.querySelectorAll("[data-placeholder]").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const href = link.getAttribute("href");
-      if (!href || href === "#") {
-        event.preventDefault();
-        link.classList.remove("needs-link");
-        void link.offsetWidth;
-        link.classList.add("needs-link");
-        window.setTimeout(() => link.classList.remove("needs-link"), 650);
-      }
-    });
-  });
-
-  // Лёгкий эффект наклона на десктопе; отключается для сенсорных устройств и reduced motion.
+  // A subtle desktop tilt effect; disabled for touch devices and reduced-motion settings.
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(pointer: fine)").matches;
   if (!reduceMotion && finePointer) {
