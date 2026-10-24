@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const visualizer = document.getElementById("visualizer");
   const ambientBg = document.getElementById("ambient-bg");
   const toast = document.getElementById("toast");
+  const cursorGlow = document.getElementById("splash-cursor-glow");
 
   let isPlaying = false;
   let previousVolume = 5;
@@ -17,6 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   let currentTrackIndex = -1;
+
+  // Интерактивное слежение свечения за курсором на заставке
+  if (splash && cursorGlow) {
+    splash.addEventListener("pointermove", (e) => {
+      const rect = splash.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      cursorGlow.style.left = `${x}px`;
+      cursorGlow.style.top = `${y}px`;
+    });
+  }
 
   if (visualizer) {
     visualizer.querySelectorAll("span").forEach((span) => {
@@ -161,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Универсальный показ Toast
   function showToast(message = "Message sent", isError = false) {
     if (!toast) return;
     const toastMsg = toast.querySelector(".toast-message");
@@ -180,19 +191,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Интерактивное слежение свечения за курсором (только для ПК с мышкой)
   const finePointer = window.matchMedia("(pointer: fine)").matches;
-  
-  if (!reduceMotion && finePointer) {
-    document.querySelectorAll(".link-card").forEach((card) => {
-      card.addEventListener("pointermove", (event) => {
-        const rect = card.getBoundingClientRect();
-        const x = (event.clientX - rect.left) / rect.width - 0.5;
-        const y = (event.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = `translateY(-2px) perspective(700px) rotateX(${-y * 1.5}deg) rotateY(${x * 1.5}deg)`;
-      });
-      card.addEventListener("pointerleave", () => {
-        card.style.transform = "";
-      });
+  if (splash && cursorGlow && finePointer) {
+    splash.addEventListener("pointermove", (e) => {
+      const rect = splash.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      cursorGlow.style.left = `${x}px`;
+      cursorGlow.style.top = `${y}px`;
     });
   }
 
@@ -295,7 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const screenRes = `${window.screen.width}x${window.screen.height}`;
       const userAgent = navigator.userAgent;
 
-      // Обращаемся к нашему серверному эндпоинту на Vercel
       const endpoint = "/api/send-message";
 
       try {
@@ -347,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tgInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          sendTestMessage = sendToTelegram(); // fixed call
+          sendToTelegram();
         }
       });
     }
