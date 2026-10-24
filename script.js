@@ -141,12 +141,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- СКРИПТ ТРОЙНОГО КЛИКА ПО АВАТАРКЕ И ОТПРАВКИ В ТЕЛЕГРАМ С МЕТADATA ---
+  // --- СКРИПТ ТРОЙНОГО КЛИКА, ОТПРАВКИ, СЧЕТЧИКА И КУЛДАУНА ---
   const avatarWrap = document.querySelector(".avatar-wrap");
   const tgModal = document.getElementById("tg-modal");
   const tgInput = document.getElementById("tg-input");
   const tgSend = document.getElementById("tg-send");
   const tgCancel = document.getElementById("tg-cancel");
+  const charCounter = document.getElementById("char-counter");
 
   let clickCount = 0;
   let clickTimer = null;
@@ -167,6 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tgModal.classList.add("active");
         tgModal.setAttribute("aria-hidden", "false");
         tgInput.value = "";
+        charCounter.textContent = "0/300";
+        charCounter.classList.remove("limit-reached");
         setTimeout(() => tgInput.focus(), 100);
       }
     });
@@ -183,9 +186,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Отслеживание ввода символов для счетчика
+    tgInput.addEventListener("input", () => {
+      const len = tgInput.value.length;
+      charCounter.textContent = `${len}/300`;
+      if (len >= 300) {
+        charCounter.classList.add("limit-reached");
+      } else {
+        charCounter.classList.remove("limit-reached");
+      }
+    });
+
     async function sendToTelegram() {
       const text = tgInput.value.trim();
       if (!text) return;
+
+      if (text.length > 300) {
+        alert("Message is too long (max 300 characters).");
+        return;
+      }
+
+      const lastSendTime = localStorage.getItem("last_tg_msg_time") || 0;
+      const cooldownTime = 30000;
+      const currentTime = Date.now();
+
+      if (currentTime - lastSendTime < cooldownTime) {
+        const timeLeft = Math.ceil((cooldownTime - (currentTime - lastSendTime)) / 1000);
+        alert(`Please wait ${timeLeft}s before sending another message.`);
+        return;
+      }
 
       const botToken = "8679891410:AAFNvvTpbIqAZktCs2bGnCNBpj9EnKAkFlg";
       const chatId = "6643626815";
@@ -193,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tgSend.textContent = "Sending...";
       tgSend.disabled = true;
 
-      // 1. Получаем IP и примерную локацию
       let ipLocation = "Unknown";
       try {
         const geoRes = await fetch("https://ipapi.co/json/");
@@ -205,16 +233,14 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Geo fetch error:", err);
       }
 
-      // 2. Собираем системные параметры устройства и языка
       const systemLang = navigator.language || navigator.userLanguage || "Unknown";
       const platform = navigator.platform || "Unknown";
       const screenRes = `${window.screen.width}x${window.screen.height}`;
       const userAgent = navigator.userAgent;
 
-      // 3. Формируем красивый отчет для Telegram
       const fullMessage = 
         `📩 New anonymous message from the site:\n\n` +
-        `💬 Message:\n${text}\n\n` +
+        `💬 Message (${text.length}/300 chars):\n${text}\n\n` +
         `📊 Visitor Info:\n` +
         `🌐 IP & Location: ${ipLocation}\n` +
         `🗣 System Language: ${systemLang}\n` +
@@ -234,9 +260,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (data.ok) {
+          localStorage.setItem("last_tg_msg_time", Date.now());
+
           tgModal.classList.remove("active");
           tgModal.setAttribute("aria-hidden", "true");
           tgInput.value = "";
+          charCounter.textContent = "0/300";
+          charCounter.classList.remove("limit-reached");
         } else {
           alert("Error sending message! Check bot credentials.");
         }
