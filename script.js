@@ -140,4 +140,122 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // --- СКРИПТ ТРОЙНОГО КЛИКА ПО АВАТАРКЕ И ОТПРАВКИ В ТЕЛЕГРАМ С МЕТADATA ---
+  const avatarWrap = document.querySelector(".avatar-wrap");
+  const tgModal = document.getElementById("tg-modal");
+  const tgInput = document.getElementById("tg-input");
+  const tgSend = document.getElementById("tg-send");
+  const tgCancel = document.getElementById("tg-cancel");
+
+  let clickCount = 0;
+  let clickTimer = null;
+
+  if (avatarWrap && tgModal) {
+    avatarWrap.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clickCount++;
+      
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 500);
+      } else if (clickCount === 3) {
+        clearTimeout(clickTimer);
+        clickCount = 0;
+        
+        tgModal.classList.add("active");
+        tgModal.setAttribute("aria-hidden", "false");
+        tgInput.value = "";
+        setTimeout(() => tgInput.focus(), 100);
+      }
+    });
+
+    tgCancel.addEventListener("click", () => {
+      tgModal.classList.remove("active");
+      tgModal.setAttribute("aria-hidden", "true");
+    });
+
+    tgModal.addEventListener("click", (e) => {
+      if (e.target === tgModal) {
+        tgModal.classList.remove("active");
+        tgModal.setAttribute("aria-hidden", "true");
+      }
+    });
+
+    async function sendToTelegram() {
+      const text = tgInput.value.trim();
+      if (!text) return;
+
+      const botToken = "8679891410:AAFNvvTpbIqAZktCs2bGnCNBpj9EnKAkFlg";
+      const chatId = "6643626815";
+
+      tgSend.textContent = "Sending...";
+      tgSend.disabled = true;
+
+      // 1. Получаем IP и примерную локацию
+      let ipLocation = "Unknown";
+      try {
+        const geoRes = await fetch("https://ipapi.co/json/");
+        const geoData = await geoRes.json();
+        if (geoData && geoData.ip) {
+          ipLocation = `${geoData.ip} (${geoData.city || "Unknown city"}, ${geoData.country_name || "Unknown country"})`;
+        }
+      } catch (err) {
+        console.log("Geo fetch error:", err);
+      }
+
+      // 2. Собираем системные параметры устройства и языка
+      const systemLang = navigator.language || navigator.userLanguage || "Unknown";
+      const platform = navigator.platform || "Unknown";
+      const screenRes = `${window.screen.width}x${window.screen.height}`;
+      const userAgent = navigator.userAgent;
+
+      // 3. Формируем красивый отчет для Telegram
+      const fullMessage = 
+        `📩 New anonymous message from the site:\n\n` +
+        `💬 Message:\n${text}\n\n` +
+        `📊 Visitor Info:\n` +
+        `🌐 IP & Location: ${ipLocation}\n` +
+        `🗣 System Language: ${systemLang}\n` +
+        `💻 Platform: ${platform} (${screenRes})\n` +
+        `📱 User-Agent: ${userAgent}`;
+
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: fullMessage
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          tgModal.classList.remove("active");
+          tgModal.setAttribute("aria-hidden", "true");
+          tgInput.value = "";
+        } else {
+          alert("Error sending message! Check bot credentials.");
+        }
+      } catch (err) {
+        console.error("Telegram API Error:", err);
+        alert("Network error. Failed to send message.");
+      } finally {
+        tgSend.textContent = "Send";
+        tgSend.disabled = false;
+      }
+    }
+
+    tgSend.addEventListener("click", sendToTelegram);
+
+    tgInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendToTelegram();
+      }
+    });
+  }
 });
