@@ -141,10 +141,13 @@
         <h3>Anonymous Message</h3>
         <p class="tg-modal-subtitle">Drop a thought, feedback, or a secret</p>
       </div>
-      <textarea id="tg-input" placeholder="Type your message here..." rows="3"></textarea>
-      <div class="tg-modal-buttons">
-        <button id="tg-cancel" class="tg-btn secondary">Cancel</button>
-        <button id="tg-send" class="tg-btn primary">Send</button>
+      <textarea id="tg-input" placeholder="Type your message here..." maxlength="300" rows="3"></textarea>
+      <div class="tg-modal-footer">
+        <span id="char-counter" class="tg-char-counter">0/300</span>
+        <div class="tg-modal-buttons">
+          <button id="tg-cancel" class="tg-btn secondary">Cancel</button>
+          <button id="tg-send" class="tg-btn primary">Send</button>
+        </div>
       </div>
     </div>
   </div>
