@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const botToken = "8679891410:AAFNvvTpbIqAZktCs2bGnCNBpj9EnKAkFlg";
+      const botToken = "8945776222:AAGNETYfKGauH2_NFhUM_QskXufmhbyjkTk";
       const chatId = "6643626815";
 
       tgSend.textContent = "Sending...";
