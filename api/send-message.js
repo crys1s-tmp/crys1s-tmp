@@ -18,7 +18,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid text length' });
   }
 
-  // Безопасно берем секреты из панели Vercel
   const botToken = process.env.BOT_TOKEN;
   const chatId = process.env.CHAT_ID;
 
@@ -26,20 +25,31 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
+  // Безопасное экранирование текста пользователя для HTML
+  const safeText = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Блок с информацией об отправителе завернут в тег <tg-spoiler>
   const fullMessage =
-    `📩 New anonymous message from the site:\n\n` +
-    `💬 Message (${text.length}/300 chars):\n${text}\n\n` +
-    `📊 Visitor Info:\n` +
+    `📩 <b>New anonymous message from the site:</b>\n\n` +
+    `💬 <b>Message (${text.length}/300 chars):</b>\n${safeText}\n\n` +
+    `<tg-spoiler>📊 <b>Visitor Info:</b>\n` +
     `🌐 IP & Location: ${visitorInfo?.ipLocation || "Unknown"}\n` +
     `🗣 System Language: ${visitorInfo?.systemLang || "Unknown"}\n` +
     `💻 Platform: ${visitorInfo?.platform || "Unknown"}\n` +
-    `📱 User-Agent: ${visitorInfo?.userAgent || "Unknown"}`;
+    `📱 User-Agent: ${visitorInfo?.userAgent || "Unknown"}</tg-spoiler>`;
 
   try {
     const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: fullMessage })
+      body: JSON.stringify({ 
+        chat_id: chatId, 
+        text: fullMessage, 
+        parse_mode: "HTML" // Включаем поддержку HTML-тегов, включая спойлер
+      })
     });
     const tgData = await tgRes.json();
 
