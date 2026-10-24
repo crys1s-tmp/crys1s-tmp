@@ -423,75 +423,16 @@ body {
   100% { height: calc(30% * var(--vol-scale, 1)); }
 }
 
-/* АМБИЕНТ-ФОН */
-.ambient-bg {
+/* Единая фоновая технологичная сетка сайта вместо блобов */
+.site-grid-bg {
   position: fixed;
   inset: 0;
   z-index: -2;
-  overflow: hidden;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.ambient-bg.active {
-  opacity: 0.45;
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px) saturate(220%);
-  background-image: url("avatar.jpg");
-  background-size: cover;
-  background-position: center;
-  mix-blend-mode: screen;
-  opacity: 0.7;
-}
-
-.blob-1 {
-  width: 45vw;
-  height: 45vw;
-  top: -10%;
-  left: -10%;
-  animation: wander-1 16s ease-in-out infinite alternate;
-}
-
-.blob-2 {
-  width: 50vw;
-  height: 50vw;
-  bottom: -15%;
-  right: -10%;
-  animation: wander-2 22s ease-in-out infinite alternate;
-}
-
-.blob-3 {
-  width: 35vw;
-  height: 35vw;
-  top: 30%;
-  left: 30%;
-  animation: wander-3 19s ease-in-out infinite alternate;
-}
-
-@keyframes wander-1 {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(25vw, 15vh) scale(1.2); }
-  66% { transform: translate(10vw, 35vh) scale(0.9); }
-  100% { transform: translate(30vw, 20vh) scale(1.1); }
-}
-
-@keyframes wander-2 {
-  0% { transform: translate(0, 0) scale(1); }
-  40% { transform: translate(-30vw, -20vh) scale(1.3); }
-  70% { transform: translate(-15vw, -35vh) scale(0.85); }
-  100% { transform: translate(-25vw, -10vh) scale(1.15); }
-}
-
-@keyframes wander-3 {
-  0% { transform: translate(0, 0) scale(0.9); }
-  30% { transform: translate(-20vw, 25vh) scale(1.25); }
-  60% { transform: translate(20vw, -20vh) scale(1); }
-  100% { transform: translate(-10vw, -15vh) scale(1.1); }
 }
 
 .bio {
