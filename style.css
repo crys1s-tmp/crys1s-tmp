@@ -35,7 +35,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #080808;
+  background: #060606;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -43,11 +43,71 @@ body {
   transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.7s;
 }
 
+/* Фоновая технологичная сетка */
+.splash-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Рамки и уголки интерфейса */
+.splash-frame-corners {
+  position: absolute;
+  inset: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+.corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: rgba(255, 255, 255, 0.3);
+  border-style: solid;
+}
+.corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+.corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+.corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+/* Системные HUD-метки по углам */
+.splash-corner-hud {
+  position: absolute;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+.splash-corner-hud.top-left { top: 34px; left: 36px; }
+.splash-corner-hud.top-right { top: 34px; right: 36px; }
+.splash-corner-hud.bottom-left { bottom: 34px; left: 36px; }
+.splash-corner-hud.bottom-right { bottom: 34px; right: 36px; }
+
+/* Свечение за курсором мыши */
+.splash-cursor-glow {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+.splash:hover .splash-cursor-glow {
+  opacity: 1;
+}
+
 .splash-glow {
   position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -102,9 +162,9 @@ body {
 
 .enter-btn {
   padding: 14px 32px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 30px;
   font-family: "JetBrains Mono", monospace;
   font-weight: 500;
@@ -128,7 +188,7 @@ body {
   margin: 0;
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
-  color: #444444;
+  color: #555555;
   letter-spacing: 0.05em;
 }
 
@@ -138,8 +198,8 @@ body {
 }
 
 @keyframes pulse-border {
-  0%, 100% { border-color: rgba(255, 255, 255, 0.15); }
-  50% { border-color: rgba(255, 255, 255, 0.4); }
+  0%, 100% { border-color: rgba(255, 255, 255, 0.12); }
+  50% { border-color: rgba(255, 255, 255, 0.35); }
 }
 
 /* БЛОК УПРАВЛЕНИЯ ГРОМКОСТЬЮ */
@@ -320,7 +380,6 @@ body {
 }
 .name span { color: #888888; }
 
-/* КОНТЕЙНЕР ДЛЯ БИО И ЭКВАЛАЙЗЕРА */
 .bio-container {
   width: 100%;
   max-width: 300px;
@@ -435,7 +494,6 @@ body {
   100% { transform: translate(-10vw, -15vh) scale(1.1); }
 }
 
-/* БИО ТЕКСТ */
 .bio {
   margin: 0;
   color: var(--muted);
@@ -449,7 +507,6 @@ body {
   transform: translateY(4px);
 }
 
-/* Соцсети */
 .socials { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; }
 .social-link {
   display: grid;
@@ -472,7 +529,6 @@ body {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Разделитель */
 .section-heading {
   width: 100%;
   display: flex;
@@ -487,7 +543,6 @@ body {
 }
 .section-mark { height: 1px; width: 30px; background: rgba(255, 255, 255, 0.15); }
 
-/* Карточки ссылок */
 .link-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 .link-card {
   position: relative;
@@ -530,7 +585,6 @@ body {
 .link-arrow { color: #666666; font-size: 18px; transition: transform .25s ease, color .25s ease; }
 .link-card:hover .link-arrow { transform: translate(3px, -3px); color: #ffffff; }
 
-/* Анимации появления */
 .reveal { opacity: 0; transform: translateY(14px); animation: reveal-in .6s cubic-bezier(.2,.7,.2,1) forwards; }
 .avatar-wrap.reveal { animation-delay: .05s; }
 .name.reveal { animation-delay: .12s; }
@@ -544,7 +598,6 @@ body {
 
 @keyframes reveal-in { to { opacity: 1; transform: translateY(0); } }
 
-/* TOAST УВЕДОМЛЕНИЕ */
 .toast {
   position: fixed;
   top: 24px;
@@ -596,7 +649,6 @@ body {
   white-space: pre-line;
 }
 
-/* МОДАЛЬНОЕ ОКНО TELEGRAM */
 .tg-modal {
   position: fixed;
   inset: 0;
@@ -730,7 +782,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* Адаптация для мобильных */
 @media (max-width: 480px) {
   .page { padding: 40px 16px 32px; }
   .avatar { width: 96px; height: 96px; }
@@ -745,6 +796,12 @@ body {
   }
   .volume-slider {
     width: 60px;
+  }
+}
+
+@media (pointer: coarse) {
+  .splash-cursor-glow {
+    display: none !important;
   }
 }
 
