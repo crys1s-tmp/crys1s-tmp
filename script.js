@@ -19,6 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentTrackIndex = -1;
 
+  // --- ЖИВЫЕ ЧАСЫ В ТЕРМИНАЛЬНОМ HUD ---
+  const hudTime = document.getElementById("hud-time");
+  if (hudTime) {
+    function updateHudTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      hudTime.textContent = `TIME: ${hours}:${minutes}:${seconds} // LIVE`;
+    }
+    updateHudTime();
+    setInterval(updateHudTime, 1000);
+  }
+
   // Интерактивное слежение свечения за курсором (только для ПК с мышкой)
   const finePointer = window.matchMedia("(pointer: fine)").matches;
   if (splash && cursorGlow && finePointer) {
@@ -191,65 +205,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // --- TELEGRAM MODAL & TRIPLE CLICK ---
-  const avatarWrap = document.querySelector(".avatar-wrap");
+  const openTgModalBtn = document.getElementById("open-tg-modal");
   const tgModal = document.getElementById("tg-modal");
   const tgInput = document.getElementById("tg-input");
   const tgSend = document.getElementById("tg-send");
   const tgCancel = document.getElementById("tg-cancel");
   const charCounter = document.getElementById("char-counter");
 
-  let clickCount = 0;
-  let clickTimer = null;
-
-  if (avatarWrap && tgModal) {
-    avatarWrap.addEventListener("click", (e) => {
+  if (openTgModalBtn && tgModal) {
+    openTgModalBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      clickCount++;
-
-      if (clickCount === 1) {
-        clickTimer = setTimeout(() => { clickCount = 0; }, 500);
-      } else if (clickCount === 3) {
-        clearTimeout(clickTimer);
-        clickCount = 0;
-
-        tgModal.classList.add("active");
-        tgModal.setAttribute("aria-hidden", "false");
-        if (tgInput) {
-          tgInput.value = "";
-          setTimeout(() => tgInput.focus(), 100);
-        }
-        if (charCounter) {
-          charCounter.textContent = "0/300";
-          charCounter.classList.remove("limit-reached");
-        }
+      tgModal.classList.add("active");
+      tgModal.setAttribute("aria-hidden", "false");
+      if (tgInput) {
+        tgInput.value = "";
+        setTimeout(() => tgInput.focus(), 100);
+      }
+      if (charCounter) {
+        charCounter.textContent = "0/300";
+        charCounter.classList.remove("limit-reached");
       }
     });
 
-    if (tgCancel) {
-      tgCancel.addEventListener("click", () => {
-        tgModal.classList.remove("active");
-        tgModal.setAttribute("aria-hidden", "true");
-      });
-    }
-
-    tgModal.addEventListener("click", (e) => {
-      if (e.target === tgModal) {
-        tgModal.classList.remove("active");
-        tgModal.setAttribute("aria-hidden", "true");
-      }
-    });
-
-    if (tgInput && charCounter) {
-      tgInput.addEventListener("input", () => {
-        const len = tgInput.value.length;
-        charCounter.textContent = `${len}/300`;
-        if (len >= 300) charCounter.classList.add("limit-reached");
-        else charCounter.classList.remove("limit-reached");
-      });
-    }
-
-    async function sendToTelegram() {
+async function sendToTelegram() {
       if (!tgInput) return;
       const text = tgInput.value.trim();
       if (!text) return;
@@ -343,6 +321,29 @@ document.addEventListener("DOMContentLoaded", () => {
           e.preventDefault();
           sendToTelegram();
         }
+      });
+    }
+
+    if (tgCancel) {
+      tgCancel.addEventListener("click", () => {
+        tgModal.classList.remove("active");
+        tgModal.setAttribute("aria-hidden", "true");
+      });
+    }
+
+    tgModal.addEventListener("click", (e) => {
+      if (e.target === tgModal) {
+        tgModal.classList.remove("active");
+        tgModal.setAttribute("aria-hidden", "true");
+      }
+    });
+
+    if (tgInput && charCounter) {
+      tgInput.addEventListener("input", () => {
+        const len = tgInput.value.length;
+        charCounter.textContent = `${len}/300`;
+        if (len >= 300) charCounter.classList.add("limit-reached");
+        else charCounter.classList.remove("limit-reached");
       });
     }
   }
