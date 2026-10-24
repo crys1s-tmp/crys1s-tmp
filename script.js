@@ -7,8 +7,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const ambientBg = document.getElementById("ambient-bg");
 
   let isPlaying = false;
-  const trackName = "jinsang — Affection";
   const originalBio = "Every crisis is temporary";
+
+  // СПИСОК ВАШИХ ТРЕКОВ ИЗ ПАПКИ
+  const playlist = [
+    { name: "Burbank — Sorry, I Like You", src: "Burbank - Sorry, I Like You.mp3" },
+    { name: "jhfly — Crossings (Early Version)", src: "jhfly - Crossings (Early Version).mp3" },
+    { name: "Jinsang — Affection", src: "Jinsang - Affection.mp3" },
+    { name: "Shierro — Vibin", src: "Shierro - Vibin.mp3" },
+    { name: "Tomppabeats — Monday Loop", src: "Tomppabeats - Monday Loop.mp3" }
+  ];
+
+  let currentTrackIndex = -1;
 
   // Делаем каждый столбик эквалайзера полностью независимым
   document.querySelectorAll('.visualizer span').forEach((span) => {
@@ -26,40 +36,66 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   }
 
+  // Функция выбора и запуска случайного трека
+  function playRandomTrack() {
+    if (playlist.length === 0) return;
+
+    let newIndex;
+    if (playlist.length > 1) {
+      do {
+        newIndex = Math.floor(Math.random() * playlist.length);
+      } while (newIndex === currentTrackIndex);
+    } else {
+      newIndex = 0;
+    }
+
+    currentTrackIndex = newIndex;
+    const track = playlist[currentTrackIndex];
+
+    audio.src = track.src;
+    audio.load();
+
+    audio.play().then(() => {
+      isPlaying = true;
+      musicToggle.classList.add("playing");
+      visualizer.classList.add("active");
+      if (ambientBg) ambientBg.classList.add("active");
+      changeBioText(track.name);
+    }).catch(err => {
+      console.log("Ошибка воспроизведения аудио:", err);
+    });
+  }
+
+  // Автоматический переход к следующему случайному треку по окончании текущего
+  audio.addEventListener("ended", () => {
+    playRandomTrack();
+  });
+
   // Функция входа при клике в ЛЮБОЕ место экрана-заставки
   function handleEnter() {
     if (splash.classList.contains("hidden")) return;
 
     splash.classList.add("hidden");
-
     audio.volume = 0;
-    audio.play().then(() => {
-      isPlaying = true;
-      musicToggle.classList.add("playing");
-      visualizer.classList.add("active");
-      if (ambientBg) ambientBg.classList.add("active"); // Включаем амбиент-фон
-      changeBioText(trackName);
 
-      // Плавный запуск громкости от 0 до 25% за 1 секунду
-      let currentVol = 0;
-      const targetVol = 0.25;
-      const duration = 1000; 
-      const intervalTime = 50; 
-      const step = targetVol / (duration / intervalTime);
+    playRandomTrack();
 
-      const fadeInterval = setInterval(() => {
-        currentVol += step;
-        if (currentVol >= targetVol) {
-          audio.volume = targetVol;
-          clearInterval(fadeInterval);
-        } else {
-          audio.volume = currentVol;
-        }
-      }, intervalTime);
+    // Плавный запуск громкости от 0 до 25% за 1 секунду
+    let currentVol = 0;
+    const targetVol = 0.25;
+    const duration = 1000; 
+    const intervalTime = 50; 
+    const step = targetVol / (duration / intervalTime);
 
-    }).catch(err => {
-      console.log("Автовоспроизведение заблокировано:", err);
-    });
+    const fadeInterval = setInterval(() => {
+      currentVol += step;
+      if (currentVol >= targetVol) {
+        audio.volume = targetVol;
+        clearInterval(fadeInterval);
+      } else {
+        audio.volume = currentVol;
+      }
+    }, intervalTime);
   }
 
   // Клик в любое место на сплэш-экране открывает сайт
@@ -72,19 +108,23 @@ document.addEventListener("DOMContentLoaded", () => {
       isPlaying = false;
       musicToggle.classList.remove("playing");
       visualizer.classList.remove("active");
-      if (ambientBg) ambientBg.classList.remove("active"); // Выключаем амбиент-фон
+      if (ambientBg) ambientBg.classList.remove("active");
       changeBioText(originalBio);
     } else {
-      audio.play().then(() => {
-        audio.volume = 0.25;
-        isPlaying = true;
-        musicToggle.classList.add("playing");
-        visualizer.classList.add("active");
-        if (ambientBg) ambientBg.classList.add("active"); // Включаем амбиент-фон
-        changeBioText(trackName);
-      }).catch(err => {
-        console.log("Ошибка воспроизведения аудио:", err);
-      });
+      if (!audio.src) {
+        playRandomTrack();
+      } else {
+        audio.play().then(() => {
+          audio.volume = 0.25;
+          isPlaying = true;
+          musicToggle.classList.add("playing");
+          visualizer.classList.add("active");
+          if (ambientBg) ambientBg.classList.add("active");
+          changeBioText(playlist[currentTrackIndex]?.name || originalBio);
+        }).catch(err => {
+          console.log("Ошибка воспроизведения аудио:", err);
+        });
+      }
     }
   });
 
