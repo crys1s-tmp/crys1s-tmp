@@ -25,10 +25,11 @@
       <span class="corner bl"></span>
       <span class="corner br"></span>
     </div>
-    <div class="splash-corner-hud top-left" aria-hidden="true">SYS_INIT // 2026.SECURE</div>
-    <div class="splash-corner-hud top-right" aria-hidden="true">LAT: 52.2370 // LON: 21.0175</div>
+    <!-- Системные HUD-метки по углам -->
+    <div class="splash-corner-hud top-left" id="hud-time" aria-hidden="true">SYS_TIME: --:--:--</div>
+    <div class="splash-corner-hud top-right hide-mobile" aria-hidden="true">LAT: 52.2370 // LON: 21.0175</div>
     <div class="splash-corner-hud bottom-left" aria-hidden="true">AUDIO_CORE: ONLINE</div>
-    <div class="splash-corner-hud bottom-right" aria-hidden="true">STATUS: STANDBY</div>
+    <div class="splash-corner-hud bottom-right hide-mobile" aria-hidden="true">STATUS: STANDBY</div>
 
     <div class="splash-glow" aria-hidden="true"></div>
     <div class="splash-cursor-glow" id="splash-cursor-glow" aria-hidden="true"></div>
@@ -52,7 +53,7 @@
   <!-- Аудио элемент -->
   <audio id="bg-audio" preload="auto"></audio>
 
-  <!-- Блок управления громкостью -->
+  <!-- Блок управления громкостью (справа сверху) -->
   <div class="volume-control">
     <button id="music-toggle" class="music-toggle" aria-label="Toggle Mute" title="Mute / Unmute">
       <svg viewBox="0 0 24 24" class="speaker-svg">
@@ -77,6 +78,11 @@
     </button>
     <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="5" step="1" aria-label="Volume">
   </div>
+
+  <!-- Незаметная командная строка анонимки (слева сверху) -->
+  <button id="open-tg-modal" class="anon-trigger" aria-label="Send anonymous message">
+    <span>&gt; send_anonymous_message()</span>
+  </button>
 
   <!-- Всплывающее уведомление (Toast) -->
   <div id="toast" class="toast" aria-live="polite">
