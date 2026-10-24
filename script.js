@@ -71,11 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (vol === 0) {
       if (visualizer) visualizer.classList.remove("active");
-      changeBioText(originalBio);
+      // Меняем текст на originalBio только если он еще не установлен
+      if (bioText && bioText.textContent !== originalBio) {
+        changeBioText(originalBio);
+      }
     } else {
       if (isPlaying) {
         if (visualizer) visualizer.classList.add("active");
-        if (playlist[currentTrackIndex]) {
+        // Меняем текст на название трека только если он еще не установлен
+        if (playlist[currentTrackIndex] && bioText && bioText.textContent !== playlist[currentTrackIndex].name) {
           changeBioText(playlist[currentTrackIndex].name);
         }
       }
