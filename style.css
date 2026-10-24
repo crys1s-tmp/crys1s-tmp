@@ -1,4 +1,8 @@
 /* MONOCHROME LINKS - Черно-белый стиль */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 :root {
   color-scheme: dark;
   --bg-top: #212121;
