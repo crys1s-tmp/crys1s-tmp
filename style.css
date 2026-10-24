@@ -198,7 +198,12 @@ body {
 }
 
 /* Аватарка */
-.avatar-wrap { position: relative; margin-bottom: 20px; }
+.avatar-wrap { 
+  position: relative; 
+  margin-bottom: 20px; 
+  cursor: pointer;
+  user-select: none;
+}
 .avatar {
   position: relative;
   width: 108px;
@@ -210,6 +215,10 @@ body {
   background: #181818;
   overflow: hidden;
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.avatar-wrap:hover .avatar {
+  border-color: rgba(255, 255, 255, 0.4);
 }
 .avatar-img {
   position: absolute;
@@ -303,7 +312,7 @@ body {
 }
 
 .ambient-bg.active {
-  opacity: 0.45; /* Общая насыщенность свечения */
+  opacity: 0.45;
 }
 
 .blob {
@@ -317,7 +326,6 @@ body {
   opacity: 0.7;
 }
 
-/* Первое пятно (левая часть, хаотичные круговые движения) */
 .blob-1 {
   width: 45vw;
   height: 45vw;
@@ -326,7 +334,6 @@ body {
   animation: wander-1 16s ease-in-out infinite alternate;
 }
 
-/* Второе пятно (правая часть, независимый дрейф) */
 .blob-2 {
   width: 50vw;
   height: 50vw;
@@ -335,7 +342,6 @@ body {
   animation: wander-2 22s ease-in-out infinite alternate;
 }
 
-/* Третье пятно (центральное, блуждающее) */
 .blob-3 {
   width: 35vw;
   height: 35vw;
@@ -344,62 +350,25 @@ body {
   animation: wander-3 19s ease-in-out infinite alternate;
 }
 
-/* Сложные хаотичные траектории для каждого пятна */
 @keyframes wander-1 {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(25vw, 15vh) scale(1.2);
-  }
-  66% {
-    transform: translate(10vw, 35vh) scale(0.9);
-  }
-  100% {
-    transform: translate(30vw, 20vh) scale(1.1);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(25vw, 15vh) scale(1.2); }
+  66% { transform: translate(10vw, 35vh) scale(0.9); }
+  100% { transform: translate(30vw, 20vh) scale(1.1); }
 }
 
 @keyframes wander-2 {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  40% {
-    transform: translate(-30vw, -20vh) scale(1.3);
-  }
-  70% {
-    transform: translate(-15vw, -35vh) scale(0.85);
-  }
-  100% {
-    transform: translate(-25vw, -10vh) scale(1.15);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-30vw, -20vh) scale(1.3); }
+  70% { transform: translate(-15vw, -35vh) scale(0.85); }
+  100% { transform: translate(-25vw, -10vh) scale(1.15); }
 }
 
 @keyframes wander-3 {
-  0% {
-    transform: translate(0, 0) scale(0.9);
-  }
-  30% {
-    transform: translate(-20vw, 25vh) scale(1.25);
-  }
-  60% {
-    transform: translate(20vw, -20vh) scale(1);
-  }
-  100% {
-    transform: translate(-10vw, -15vh) scale(1.1);
-  }
-}
-
-@keyframes ambient-drift {
-  0% {
-    transform: scale(1) translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: scale(1.15) translate(-4%, 5%) rotate(2deg);
-  }
-  100% {
-    transform: scale(1.08) translate(4%, -3%) rotate(-1deg);
-  }
+  0% { transform: translate(0, 0) scale(0.9); }
+  30% { transform: translate(-20vw, 25vh) scale(1.25); }
+  60% { transform: translate(20vw, -20vh) scale(1); }
+  100% { transform: translate(-10vw, -15vh) scale(1.1); }
 }
 
 /* БИО ТЕКСТ С ПЛАВНОЙ СМЕНОЙ */
@@ -510,6 +479,122 @@ body {
 .link-card:nth-child(4).reveal { animation-delay: .54s; }
 
 @keyframes reveal-in { to { opacity: 1; transform: translateY(0); } }
+
+/* МОДАЛЬНОЕ ОКНО TELEGRAM */
+.tg-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 20px;
+}
+
+.tg-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tg-modal-content {
+  width: 100%;
+  max-width: 380px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tg-modal.active .tg-modal-content {
+  transform: scale(1);
+}
+
+.tg-modal-header {
+  text-align: center;
+}
+
+.tg-modal-header h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.tg-modal-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #666666;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.tg-modal-content textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13.5px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tg-modal-content textarea:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tg-modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.tg-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.tg-btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #888;
+}
+
+.tg-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.tg-btn.primary {
+  background: #fff;
+  color: #000;
+}
+
+.tg-btn.primary:hover {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+}
 
 @media (max-width: 480px) {
   .page { padding: 40px 16px 32px; }
