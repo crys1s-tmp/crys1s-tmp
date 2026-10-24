@@ -11,11 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // СПИСОК ВАШИХ ТРЕКОВ ИЗ ПАПКИ
   const playlist = [
-    { name: "Burbank — Sorry, I Like You", src: "Burbank - Sorry, I Like You.mp3" },
-    { name: "jhfly — Crossings (Early Version)", src: "jhfly - Crossings (Early Version).mp3" },
-    { name: "Jinsang — Affection", src: "Jinsang - Affection.mp3" },
-    { name: "Shierro — Vibin", src: "Shierro - Vibin.mp3" },
-    { name: "Tomppabeats — Monday Loop", src: "Tomppabeats - Monday Loop.mp3" }
+    { name: "Lex Amarni - the kill 2", src: "Lex Amarni, 2muchmotion - the kill 2.mp3" },
   ];
 
   let currentTrackIndex = -1;
