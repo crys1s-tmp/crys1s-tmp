@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const musicToggle = document.getElementById("music-toggle");
   const bioText = document.getElementById("bio-text");
   const visualizer = document.getElementById("visualizer");
+  const ambientBg = document.getElementById("ambient-bg");
 
   let isPlaying = false;
   const trackName = "jinsang — Affection";
@@ -36,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
       isPlaying = true;
       musicToggle.classList.add("playing");
       visualizer.classList.add("active");
+      if (ambientBg) ambientBg.classList.add("active"); // Включаем амбиент-фон
       changeBioText(trackName);
 
       // Плавный запуск громкости от 0 до 25% за 1 секунду
@@ -70,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
       isPlaying = false;
       musicToggle.classList.remove("playing");
       visualizer.classList.remove("active");
+      if (ambientBg) ambientBg.classList.remove("active"); // Выключаем амбиент-фон
       changeBioText(originalBio);
     } else {
       audio.play().then(() => {
@@ -77,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isPlaying = true;
         musicToggle.classList.add("playing");
         visualizer.classList.add("active");
+        if (ambientBg) ambientBg.classList.add("active"); // Включаем амбиент-фон
         changeBioText(trackName);
       }).catch(err => {
         console.log("Ошибка воспроизведения аудио:", err);
