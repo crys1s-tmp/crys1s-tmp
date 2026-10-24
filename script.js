@@ -19,8 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentTrackIndex = -1;
 
-  // Интерактивное слежение свечения за курсором на заставке
-  if (splash && cursorGlow) {
+  // Интерактивное слежение свечения за курсором (только для ПК с мышкой)
+  const finePointer = window.matchMedia("(pointer: fine)").matches;
+  if (splash && cursorGlow && finePointer) {
     splash.addEventListener("pointermove", (e) => {
       const rect = splash.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -188,19 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       toast.classList.remove("show");
     }, 3000);
-  }
-
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // Интерактивное слежение свечения за курсором (только для ПК с мышкой)
-  const finePointer = window.matchMedia("(pointer: fine)").matches;
-  if (splash && cursorGlow && finePointer) {
-    splash.addEventListener("pointermove", (e) => {
-      const rect = splash.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      cursorGlow.style.left = `${x}px`;
-      cursorGlow.style.top = `${y}px`;
-    });
   }
 
   // --- TELEGRAM MODAL & TRIPLE CLICK ---
