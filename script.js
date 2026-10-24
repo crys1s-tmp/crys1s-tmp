@@ -71,14 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (vol === 0) {
       if (visualizer) visualizer.classList.remove("active");
-      // Меняем текст на originalBio только если он еще не установлен
       if (bioText && bioText.textContent !== originalBio) {
         changeBioText(originalBio);
       }
     } else {
       if (isPlaying) {
         if (visualizer) visualizer.classList.add("active");
-        // Меняем текст на название трека только если он еще не установлен
         if (playlist[currentTrackIndex] && bioText && bioText.textContent !== playlist[currentTrackIndex].name) {
           changeBioText(playlist[currentTrackIndex].name);
         }
@@ -163,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Универсальный показ Toast (isError = true для крестика и красного фона)
+  // Универсальный показ Toast
   function showToast(message = "Message sent", isError = false) {
     if (!toast) return;
     const toastMsg = toast.querySelector(".toast-message");
@@ -172,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (toastMsg) toastMsg.textContent = message;
     if (toastIcon) {
       toastIcon.textContent = isError ? "✕" : "✓";
-      toastIcon.style.background = isError ? "#ef4444" : "#22c55e"; // Красный для ошибки, зеленый для успеха
+      toastIcon.style.background = isError ? "#ef4444" : "#22c55e";
     }
 
     toast.classList.add("show");
@@ -181,7 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // Только базовый Tilt карточек на ПК (без параллакса и глитчей)
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(pointer: fine)").matches;
   
@@ -263,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!text) return;
 
       if (text.length > 300) {
-        alert("Message is too long (max 300 characters).");
+        showToast("Message is too long (max 300 chars).", true);
         return;
       }
 
@@ -273,12 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (currentTime - lastSendTime < cooldownTime) {
         const timeLeft = Math.ceil((cooldownTime - (currentTime - lastSendTime)) / 1000);
-        showToast(`Please wait ${timeLeft}s before next message`, true); // true включает красный крестик
+        showToast(`Please wait ${timeLeft}s before next message`, true);
         return;
       }
-
-      const botToken = "8945776222:AAGNETYfKGauH2_NFhUM_QskXufmhbyjkTk";
-      const chatId = "6643626815";
 
       if (tgSend) {
         tgSend.textContent = "Sending...";
@@ -301,25 +295,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const screenRes = `${window.screen.width}x${window.screen.height}`;
       const userAgent = navigator.userAgent;
 
-      const fullMessage =
-        `📩 New anonymous message from the site:\n\n` +
-        `💬 Message (${text.length}/300 chars):\n${text}\n\n` +
-        `📊 Visitor Info:\n` +
-        `🌐 IP & Location: ${ipLocation}\n` +
-        `🗣 System Language: ${systemLang}\n` +
-        `💻 Platform: ${platform} (${screenRes})\n` +
-        `📱 User-Agent: ${userAgent}`;
-
-      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      // Обращаемся к нашему серверному эндпоинту на Vercel
+      const endpoint = "/api/send-message";
 
       try {
-        const res = await fetch(url, {
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatId, text: fullMessage })
+          body: JSON.stringify({
+            text,
+            visitorInfo: {
+              ipLocation,
+              systemLang,
+              platform: `${platform} (${screenRes})`,
+              userAgent
+            }
+          })
         });
+        
         const data = await res.json();
-        if (data.ok) {
+        
+        if (res.ok && data.success) {
           localStorage.setItem("last_tg_msg_time", Date.now());
 
           tgModal.classList.remove("active");
@@ -330,13 +326,13 @@ document.addEventListener("DOMContentLoaded", () => {
             charCounter.classList.remove("limit-reached");
           }
 
-          showToast("Message sent");
+          showToast("Message sent", false);
         } else {
-          alert("Error sending message! Check bot credentials.");
+          showToast("Error sending message!", true);
         }
       } catch (err) {
-        console.error("Telegram API Error:", err);
-        alert("Network error. Failed to send message.");
+        console.error("API Error:", err);
+        showToast("Network error. Failed to send.", true);
       } finally {
         if (tgSend) {
           tgSend.textContent = "Send";
@@ -351,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tgInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          sendToTelegram();
+          sendTestMessage = sendToTelegram(); // fixed call
         }
       });
     }
