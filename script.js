@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "backfromparadise - LEGACY (slowed)", src: "backfromparadise, PIXY - LEGACY (slowed down).mp3" },
     { name: "LONOWN - addiction", src: "LONOWN, Asenssia - addiction.mp3" },
     { name: "LONOWN - worry", src: "LONOWN, riserayss - worry.mp3" },
-    { name: "LONOWN - starly (Slowed)", src: "LONOWN, riserayss - starly (Slowed).mp3" },
+    { name: "LONOWN - starly (Slowed)", src: "LONOWN riserayss - starly (Slowed).mp3" },
   ];
 
   let currentTrackIndex = -1;
