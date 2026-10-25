@@ -439,7 +439,7 @@ html, body {
   background: #ffffff;
   border-radius: 2px;
   height: 15%;
-  animation: bounce 1s ease-in-out infinite alternate;
+  transition: height 0.05s ease; /* Плавность изменения под музыку */
 }
 
 @keyframes bounce {
