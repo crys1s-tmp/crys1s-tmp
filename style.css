@@ -28,6 +28,32 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ФОНОВАЯ СЕТКА САЙТА (ПОВОРОТ 10°, ДВИЖЕНИЕ ВНИЗ И ПАРАЛЛАКС) */
+.site-grid-bg {
+  position: fixed;
+  inset: -200px;
+  z-index: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  transform: rotate(10deg) scale(1.6);
+  filter: blur(1.0px); /* Легкое размытие для мягкого свечения линий */
+  animation: grid-flow 15s linear infinite;
+  will-change: background-position, transform;
+  transition: transform 0.1s ease-out;
+}
+
+@keyframes grid-flow {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 50px;
+  }
+}
+
 /* ЭКРАН-ЗАСТАВКА (SPLASH) */
 .splash {
   position: fixed;
@@ -41,13 +67,13 @@ html, body {
   transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.7s;
 }
 
-/* Фоновая технологичная сетка */
+/* Фоновая технологичная сетка на сплэш-экране */
 .splash-grid {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
 }
@@ -297,13 +323,15 @@ html, body {
 .noise {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   pointer-events: none;
   opacity: .03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
 }
 
 .page {
+  position: relative;
+  z-index: 2;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -317,10 +345,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 14px; /* Просторный зазор без риска появления скролла */
+  gap: 14px;
 }
 
-/* Аватарка с увеличенным размером */
+/* Аватарка */
 .avatar-wrap { 
   position: relative; 
   margin-bottom: 2px; 
@@ -333,7 +361,7 @@ html, body {
   height: 144px;
   display: grid;
   place-items: center;
-  border-radius: 22px; /* Мягкие скругленные углы */
+  border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: #181818;
   overflow: hidden;
@@ -418,17 +446,6 @@ html, body {
   0% { height: calc(15% * var(--vol-scale, 1)); }
   50% { height: calc(95% * var(--vol-scale, 1)); }
   100% { height: calc(30% * var(--vol-scale, 1)); }
-}
-
-.site-grid-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
 }
 
 .bio {
