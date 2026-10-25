@@ -156,6 +156,12 @@ document.addEventListener("DOMContentLoaded", () => {
     splash.classList.add("hidden");
     setVolume(5);
     playRandomTrack();
+
+    // Запуск Web Audio API анализатора после взаимодействия пользователя
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    initAudioAnalyzer();
   }
 
   if (splash) {
@@ -388,5 +394,48 @@ document.addEventListener("DOMContentLoaded", () => {
         gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${currentTiltX}px, ${currentTiltY}px)`;
       });
     }
+  }
+  // --- НАСТОЯЩИЙ АНАЛИЗАТОР МУЗЫКИ (WEB AUDIO API) ---
+  let audioCtx = null;
+  let analyser = null;
+  let dataArray = null;
+  let isSourceConnected = false;
+
+  function initAudioAnalyzer() {
+    if (isSourceConnected || !audio) return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+      analyser = audioCtx.createAnalyser();
+      
+      // Подключаем аудиоэлемент к анализатору
+      const source = audioCtx.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      analyser.fftSize = 64; // Количество частотных полос
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      isSourceConnected = true;
+
+      visualizeRealtime();
+    } catch (e) {
+      console.log("Web Audio API not supported or blocked:", e);
+    }
+  }
+
+  function visualizeRealtime() {
+    requestAnimationFrame(visualizeRealtime);
+
+    if (!visualizer || !analyser || !isPlaying || audio.volume === 0) return;
+
+    analyser.getByteFrequencyData(dataArray);
+    const spans = visualizer.querySelectorAll("span");
+
+    spans.forEach((span, index) => {
+      // Берем данные частоты для каждой полоски эквалайзера
+      const val = dataArray[index % dataArray.length];
+      const heightPercent = Math.max(10, (val / 255) * 100); // Переводим в проценты
+      span.style.height = `${heightPercent}%`;
+    });
   }
 });
