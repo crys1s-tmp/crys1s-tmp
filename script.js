@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Параллакс сетки: для ПК — от движения курсора мыши, для Android — от наклона устройства (без iOS)
+  // Параллакс сетки: для ПК — от мыши, для Android — от наклона (с защитой от скачков и сглаживанием)
   if (window.matchMedia('(pointer: fine)').matches) {
     const gridBg = document.querySelector('.site-grid-bg');
     if (gridBg) {
@@ -366,14 +366,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     if (isMobileDevice && !isIOSDevice) {
+      let currentTiltX = 0;
+      let currentTiltY = 0;
+
       window.addEventListener('deviceorientation', (e) => {
         const gridBg = document.querySelector('.site-grid-bg');
         if (!gridBg) return;
 
-        const tiltX = e.gamma ? e.gamma * 0.8 : 0;
-        const tiltY = e.beta ? (e.beta - 45) * 0.8 : 0;
+        let gamma = e.gamma || 0;
+        let beta = e.beta || 0;
 
-        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${tiltX}px, ${tiltY}px)`;
+        gamma = Math.max(-45, Math.min(45, gamma));
+        beta = Math.max(10, Math.min(90, beta));
+
+        const targetX = gamma * 0.6;
+        const targetY = (beta - 45) * 0.6;
+
+        currentTiltX += (targetX - currentTiltX) * 0.15;
+        currentTiltY += (targetY - currentTiltY) * 0.15;
+
+        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${currentTiltX}px, ${currentTiltY}px)`;
       });
     }
   }
