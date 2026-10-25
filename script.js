@@ -247,12 +247,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const lastSendTime = localStorage.getItem("last_tg_msg_time") || 0;
-      const cooldownTime = 30000;
+      const cooldownTime = 300000;
       const currentTime = Date.now();
 
       if (currentTime - lastSendTime < cooldownTime) {
-        const timeLeft = Math.ceil((cooldownTime - (currentTime - lastSendTime)) / 1000);
-        showToast(`Please wait ${timeLeft}s before next message`, true);
+        const timeLeftSec = Math.ceil((cooldownTime - (currentTime - lastSendTime)) / 1000);
+        
+        // Автоматический перевод в минуты и секунды
+        const minutes = Math.floor(timeLeftSec / 60);
+        const seconds = timeLeftSec % 60;
+        const timeString = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+        showToast(`Please wait ${timeString} before next message`, true);
         return;
       }
 
