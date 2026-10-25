@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-async function sendToTelegram() {
+    async function sendToTelegram() {
       if (!tgInput) return;
       const text = tgInput.value.trim();
       if (!text) return;
@@ -350,39 +350,31 @@ async function sendToTelegram() {
       });
     }
   }
-  function handleEnter() {
-    if (!splash || splash.classList.contains("hidden")) return;
 
-    splash.classList.add("hidden");
-    setVolume(5);
-    playRandomTrack();
-
-    // Запрос разрешения на доступ к гироскопу для iOS (по клику на заставку)
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            window.addEventListener('deviceorientation', handleDeviceOrientation);
-          }
-        })
-        .catch(console.error);
-    } else {
-      // Для Android и других ОС разрешение не требуется
-      window.addEventListener('deviceorientation', handleDeviceOrientation);
-    }
-  }
-
-  // Обработчик наклона телефона
-  function handleDeviceOrientation(e) {
+  // Параллакс сетки: для ПК — от движения курсора мыши, для Android — от наклона устройства (без iOS)
+  if (window.matchMedia('(pointer: fine)').matches) {
     const gridBg = document.querySelector('.site-grid-bg');
-    if (!gridBg) return;
+    if (gridBg) {
+      window.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 40;
+        const y = (e.clientY / window.innerHeight - 0.5) * 40;
+        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${x}px, ${y}px)`;
+      });
+    }
+  } else {
+    const isMobileDevice = window.matchMedia('(pointer: coarse)').matches;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-    // e.gamma — наклон влево/вправо (диапазон от -90 до 90)
-    // e.beta — наклон вперед/назад (диапазон от -180 до 180)
-    const tiltX = e.gamma ? e.gamma * 0.8 : 0;
-    const tiltY = e.beta ? (e.beta - 45) * 0.8 : 0; // -45 чтобы телефон было комфортно держать в руке
+    if (isMobileDevice && !isIOSDevice) {
+      window.addEventListener('deviceorientation', (e) => {
+        const gridBg = document.querySelector('.site-grid-bg');
+        if (!gridBg) return;
 
-    // Применяем смещение, сохраняя поворот на 10 градусов и зум
-    gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${tiltX}px, ${tiltY}px)`;
+        const tiltX = e.gamma ? e.gamma * 0.8 : 0;
+        const tiltY = e.beta ? (e.beta - 45) * 0.8 : 0;
+
+        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${tiltX}px, ${tiltY}px)`;
+      });
+    }
   }
 });
