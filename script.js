@@ -408,18 +408,17 @@ document.addEventListener("DOMContentLoaded", () => {
       audioCtx = new AudioContext();
       analyser = audioCtx.createAnalyser();
       
-      // Подключаем аудиоэлемент к анализатору
       const source = audioCtx.createMediaElementSource(audio);
       source.connect(analyser);
       analyser.connect(audioCtx.destination);
 
-      analyser.fftSize = 64; // Количество частотных полос
+      analyser.fftSize = 128; // Больше точек для плавной сетки (64 частотных бина)
       dataArray = new Uint8Array(analyser.frequencyBinCount);
       isSourceConnected = true;
 
       visualizeRealtime();
     } catch (e) {
-      console.log("Web Audio API not supported or blocked:", e);
+      console.log("Web Audio API skipped:", e);
     }
   }
 
@@ -430,11 +429,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     analyser.getByteFrequencyData(dataArray);
     const spans = visualizer.querySelectorAll("span");
+    const totalSpans = spans.length;
 
     spans.forEach((span, index) => {
-      // Берем данные частоты для каждой полоски эквалайзера
-      const val = dataArray[index % dataArray.length];
-      const heightPercent = Math.max(10, (val / 255) * 100); // Переводим в проценты
+      // Равномерно распределяем полоски по спектру (отсекая пустые высокие частоты)
+      const dataIndex = Math.floor((index / totalSpans) * (dataArray.length * 0.75));
+      const val = dataArray[dataIndex];
+      const heightPercent = Math.max(10, (val / 255) * 100);
       span.style.height = `${heightPercent}%`;
     });
   }
