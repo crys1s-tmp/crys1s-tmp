@@ -391,8 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
         gamma = Math.max(-45, Math.min(45, gamma));
         beta = Math.max(10, Math.min(90, beta));
 
-        const targetX = gamma * 0.6;
-        const targetY = (beta - 45) * 0.6;
+        const targetX = gamma * 1.5;
+        const targetY = (beta - 45) * 1.5;
 
         currentTiltX += (targetX - currentTiltX) * 0.15;
         currentTiltY += (targetY - currentTiltY) * 0.15;
