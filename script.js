@@ -350,4 +350,39 @@ async function sendToTelegram() {
       });
     }
   }
+  function handleEnter() {
+    if (!splash || splash.classList.contains("hidden")) return;
+
+    splash.classList.add("hidden");
+    setVolume(5);
+    playRandomTrack();
+
+    // Запрос разрешения на доступ к гироскопу для iOS (по клику на заставку)
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            window.addEventListener('deviceorientation', handleDeviceOrientation);
+          }
+        })
+        .catch(console.error);
+    } else {
+      // Для Android и других ОС разрешение не требуется
+      window.addEventListener('deviceorientation', handleDeviceOrientation);
+    }
+  }
+
+  // Обработчик наклона телефона
+  function handleDeviceOrientation(e) {
+    const gridBg = document.querySelector('.site-grid-bg');
+    if (!gridBg) return;
+
+    // e.gamma — наклон влево/вправо (диапазон от -90 до 90)
+    // e.beta — наклон вперед/назад (диапазон от -180 до 180)
+    const tiltX = e.gamma ? e.gamma * 0.8 : 0;
+    const tiltY = e.beta ? (e.beta - 45) * 0.8 : 0; // -45 чтобы телефон было комфортно держать в руке
+
+    // Применяем смещение, сохраняя поворот на 10 градусов и зум
+    gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${tiltX}px, ${tiltY}px)`;
+  }
 });
