@@ -5,15 +5,15 @@
   --bg-bottom: #000000;
   --accent: #ffffff;
   --accent-muted: #888888;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.035);
+  --card-border: rgba(255, 255, 255, 0.12);
   --text: #ffffff;
   --muted: #a0a0a0;
-  --radius: 16px;
+  --radius: 18px;
 }
 
 /* Отключение синей подсветки тапов на мобильных устройствах */
-* { 
+*, *::before, *::after { 
   box-sizing: border-box; 
   -webkit-tap-highlight-color: transparent;
 }
@@ -28,7 +28,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ЭКРАН-ЗАСТВКА (SPLASH) */
+/* ЭКРАН-ЗАСТАВКА (SPLASH) */
 .splash {
   position: fixed;
   inset: 0;
@@ -203,16 +203,16 @@ html, body {
 /* БЛОК УПРАВЛЕНИЯ ГРОМКОСТЬЮ */
 .volume-control {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   z-index: 500;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 12px 6px 8px;
+  gap: 12px;
+  padding: 8px 14px 8px 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border-radius: 16px;
   backdrop-filter: blur(12px);
   transition: border-color 0.3s ease, background 0.3s ease;
 }
@@ -308,19 +308,19 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px 20px;
+  padding: 20px;
 }
 
 .profile {
-  width: min(100%, 420px);
+  width: min(100%, 460px);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 10px; /* Плотный зазор, чтобы всё гарантированно влезало в 100vh без скролла */
+  gap: 14px; /* Просторный зазор без риска появления скролла */
 }
 
-/* Аватарка с полукруглыми скругленными углами */
+/* Аватарка с увеличенным размером */
 .avatar-wrap { 
   position: relative; 
   margin-bottom: 2px; 
@@ -329,15 +329,15 @@ html, body {
 }
 .avatar {
   position: relative;
-  width: 76px;
-  height: 76px;
+  width: 144px;
+  height: 144px;
   display: grid;
   place-items: center;
-  border-radius: 22px; /* Мягкие скругленные углы в стиле иконок */
+  border-radius: 22px; /* Мягкие скругленные углы */
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: #181818;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
 }
 .avatar-wrap:hover .avatar {
   border-color: rgba(255, 255, 255, 0.4);
@@ -352,7 +352,7 @@ html, body {
   z-index: 2;
 }
 .avatar-letter { 
-  font-size: 30px; 
+  font-size: 36px; 
   font-weight: 800; 
   color: #fff; 
 }
@@ -360,18 +360,18 @@ html, body {
   position: absolute;
   right: 4px;
   bottom: 4px;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #ffffff;
   border: 2px solid #1a1a1a;
   z-index: 3;
 }
 
-/* Имя */
+/* Имя пользователя */
 .name {
   margin: 0;
-  font-size: clamp(24px, 5vw, 32px);
+  font-size: clamp(28px, 6vw, 36px);
   font-weight: 800;
   color: #ffffff;
 }
@@ -379,13 +379,13 @@ html, body {
 
 .bio-container {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 42px;
 }
 
 /* ЭКВАЛАЙЗЕР */
@@ -393,9 +393,9 @@ html, body {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  width: 200px;
+  width: 210px;
   max-width: 100%;
-  height: 18px;
+  height: 20px;
   margin-bottom: 4px;
   opacity: 0;
   visibility: hidden;
@@ -407,7 +407,7 @@ html, body {
 }
 
 .visualizer span {
-  width: 2px;
+  width: 2.5px;
   background: #ffffff;
   border-radius: 2px;
   height: 15%;
@@ -434,7 +434,7 @@ html, body {
 .bio {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 1;
@@ -447,21 +447,21 @@ html, body {
 .socials { 
   display: flex; 
   justify-content: center; 
-  gap: 8px; 
-  margin-bottom: 0; 
+  gap: 10px; 
+  margin-bottom: 2px; 
 }
 .social-link {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   color: #cccccc;
   transition: all .25s ease;
 }
-.social-link svg { width: 16px; height: 16px; fill: currentColor; }
+.social-link svg { width: 18px; height: 18px; fill: currentColor; }
 .social-link svg rect, .social-link svg circle:not(.solid) { fill: none; stroke: currentColor; stroke-width: 2; }
 .social-link:hover {
   transform: translateY(-2px);
@@ -473,15 +473,15 @@ html, body {
 
 .anon-trigger {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 24px;
+  left: 24px;
   z-index: 500;
   background: transparent;
   border: none;
   padding: 0;
   font-family: "JetBrains Mono", monospace;
-  font-size: 11px;
-  color: #444444;
+  font-size: 11.5px;
+  color: #555555;
   cursor: pointer;
   letter-spacing: 0.1em;
   transition: color 0.2s ease, text-shadow 0.2s ease;
@@ -489,14 +489,14 @@ html, body {
 
 .anon-trigger:hover {
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 480px) {
   .anon-trigger {
-    top: 12px;
-    left: 12px;
-    font-size: 10px;
+    top: 16px;
+    left: 16px;
+    font-size: 10.5px;
   }
 }
 
@@ -505,29 +505,29 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin: 0;
+  gap: 10px;
+  margin: 2px 0;
   color: #666666;
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: .22em;
 }
-.section-mark { height: 1px; width: 24px; background: rgba(255, 255, 255, 0.15); }
+.section-mark { height: 1px; width: 28px; background: rgba(255, 255, 255, 0.15); }
 
 .link-list { 
   width: 100%; 
   display: flex; 
   flex-direction: column; 
-  gap: 6px; 
+  gap: 10px; 
 }
 .link-card {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
-  min-height: 44px;
-  padding: 6px 14px;
+  min-height: 52px;
+  padding: 8px 18px;
   text-decoration: none;
   color: var(--text);
   border: 1px solid var(--card-border);
@@ -544,21 +544,21 @@ html, body {
 }
 .link-card:focus-visible, .social-link:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
 .link-icon {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: #ffffff;
 }
-.link-icon svg { width: 16px; height: 16px; fill: currentColor; }
+.link-icon svg { width: 18px; height: 18px; fill: currentColor; }
 .icon-instagram svg rect, .icon-instagram svg circle:not(.solid) { fill: none; stroke: currentColor; stroke-width: 2; }
 .link-copy { min-width: 0; display: flex; flex: 1; align-items: center; }
-.link-copy strong { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
-.link-arrow { color: #666666; font-size: 16px; transition: transform .25s ease, color .25s ease; }
+.link-copy strong { font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; }
+.link-arrow { color: #666666; font-size: 18px; transition: transform .25s ease, color .25s ease; }
 .link-card:hover .link-arrow { transform: translate(2px, -2px); color: #ffffff; }
 
 .reveal { opacity: 0; transform: translateY(14px); animation: reveal-in .6s cubic-bezier(.2,.7,.2,1) forwards; }
@@ -759,21 +759,24 @@ html, body {
   transform: translateY(-1px);
 }
 
+/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ */
 @media (max-width: 480px) {
-  .page { padding: 20px 16px; }
-  .avatar { width: 70px; height: 70px; border-radius: 20px; }
+  .page { padding: 16px; }
+  .profile { gap: 12px; }
+  .avatar { width: 120px; height: 120px; border-radius: 20px; }
   .avatar-img { border-radius: 20px; }
-  .avatar-letter { font-size: 26px; }
-  .link-card { min-height: 40px; padding: 6px 12px; }
+  .avatar-letter { font-size: 30px; }
+  .link-card { min-height: 48px; padding: 8px 14px; gap: 12px; }
+  .link-icon { flex: 0 0 34px; width: 34px; height: 34px; }
   
   .volume-control {
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    right: 16px;
     left: auto;
-    padding: 4px 10px 4px 6px;
+    padding: 6px 12px 6px 8px;
   }
   .volume-slider {
-    width: 60px;
+    width: 65px;
   }
 }
 
