@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const playlist = [
     { name: "Lex Amarni - the kill 2", src: "Lex Amarni, 2muchmotion - the kill 2.mp3" },
+    { name: "backfromparadise - LEGACY (slowed)", src: "backfromparadise, PIXY - LEGACY (slowed down).mp3" },
+    { name: "LONOWN - addiction", src: "LONOWN, Asenssia - addiction.mp3" },
+    { name: "LONOWN - worry", src: "LONOWN, riserayss - worry.mp3" },
   ];
 
   let currentTrackIndex = -1;
