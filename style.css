@@ -39,7 +39,6 @@ html, body {
   background-size: 50px 50px;
   pointer-events: none;
   transform: rotate(10deg) scale(1.6);
-  filter: blur(1.0px); /* Легкое размытие для мягкого свечения линий */
   animation: grid-flow 15s linear infinite;
   will-change: background-position, transform;
   transition: transform 0.1s ease-out;
