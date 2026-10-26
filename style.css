@@ -12,7 +12,7 @@
   --radius: 18px;
 }
 
-/* Отключение синей подсветки тапов на мобильных устройствах */
+/* Отключение синeй подсветки тапов на мобильных устройствах */
 *, *::before, *::after { 
   box-sizing: border-box; 
   -webkit-tap-highlight-color: transparent;
