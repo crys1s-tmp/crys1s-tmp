@@ -28,32 +28,14 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ФОНОВАЯ СЕТКА САЙТА С ИНТЕРАКТИВНЫМ ЗАТУХАНИЕМ У КУРСОРУ */
-.site-grid-bg {
+/* ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ФИЗИКОЙ ПРИТЯЖЕНИЯ */
+#interactive-grid-canvas {
   position: fixed;
-  inset: -200px;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
   pointer-events: none;
-  transform: rotate(10deg) scale(1.6);
-  will-change: background-position, transform;
-  
-  /* Эффект выжигания сетки курсором */
-  -webkit-mask-image: radial-gradient(
-    circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    transparent 0%,
-    rgba(0, 0, 0, 0.15) 60%,
-    black 100%
-  );
-  mask-image: radial-gradient(
-    circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    transparent 0%,
-    rgba(0, 0, 0, 0.15) 60%,
-    black 100%
-  );
 }
 
 @keyframes grid-flow {
