@@ -360,8 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ФИЗИКОЙ ПРИТЯЖЕНИЯ К КУРСОРУ ---
-  // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ПОТОКОМ, ГИРОСКОПОМ И ПРИТЯЖЕНИЕМ ---
+  // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С БЕСШОВНЫМ ПОТОКОМ И ФИЗИКОЙ ---
   const gridCanvas = document.getElementById("interactive-grid-canvas");
   if (gridCanvas) {
     const ctx = gridCanvas.getContext("2d");
@@ -381,28 +380,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let mouse = { x: -1000, y: -1000 };
     let points = [];
-    let gridOffsetY = 0; // Переменная для естественного движения сетки вниз
+    let gridOffsetY = 0;
 
-    // Переменные для гироскопа на мобильных
     let tiltOffsetX = 0;
     let tiltOffsetY = 0;
     let currentTiltX = 0;
     let currentTiltY = 0;
 
+    let cols, rows;
+
     function initGrid() {
       points = [];
-      const cols = Math.ceil(width / spacing) + 6;
-      const rows = Math.ceil(height / spacing) + 6;
+      cols = Math.ceil(width / spacing) + 6;
+      rows = Math.ceil(height / spacing) + 6;
 
       for (let r = -3; r < rows; r++) {
         for (let c = -3; c < cols; c++) {
-          const origX = c * spacing;
-          const origY = r * spacing;
           points.push({
-            origX: origX,
-            origY: origY,
-            x: origX,
-            y: origY
+            origX: c * spacing,
+            origY: r * spacing,
+            offsetX: 0,
+            offsetY: 0,
+            x: c * spacing,
+            y: r * spacing
           });
         }
       }
@@ -411,7 +411,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     if (!isMobile) {
-      // События мыши только для ПК
       window.addEventListener("mousemove", (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
@@ -422,10 +421,9 @@ document.addEventListener("DOMContentLoaded", () => {
         mouse.y = -1000;
       });
     } else {
-      // События гироскопа для мобильных устройств
       window.addEventListener("deviceorientation", (e) => {
-        let gamma = e.gamma || 0; // Наклон влево-вправо
-        let beta = e.beta || 0;   // Наклон вперед-назад
+        let gamma = e.gamma || 0;
+        let beta = e.beta || 0;
 
         gamma = Math.max(-45, Math.min(45, gamma));
         beta = Math.max(10, Math.min(90, beta));
@@ -438,13 +436,24 @@ document.addEventListener("DOMContentLoaded", () => {
     function animateGrid() {
       ctx.clearRect(0, 0, width, height);
 
-      // Плавное естественное движение сетки вниз
+      // Плавное движение потока вниз без резких скачков
       gridOffsetY += 0.35;
       if (gridOffsetY >= spacing) {
-        gridOffsetY = 0;
+        gridOffsetY -= spacing;
+        // Компенсируем сдвиг сетки для абсолютно бесшовного цикличного цикла
+        for (let p of points) {
+          p.origY += spacing;
+        }
       }
 
-      // Сглаживание наклона для мобильных
+      // Переброска точек, ушедших за нижний экран, обратно наверх
+      const totalGridHeight = (rows + 6) * spacing;
+      for (let p of points) {
+        if (p.origY > height + 2 * spacing) {
+          p.origY -= totalGridHeight;
+        }
+      }
+
       if (isMobile) {
         currentTiltX += (tiltOffsetX - currentTiltX) * 0.1;
         currentTiltY += (tiltOffsetY - currentTiltY) * 0.1;
@@ -453,37 +462,37 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
       ctx.lineWidth = 1;
 
-      const cols = Math.ceil(width / spacing) + 6;
       const totalPoints = points.length;
 
-      // Расчет позиций точек с учетом физики и потока
+      // Расчет физики притяжения мыши отдельно от базового потока
       for (let i = 0; i < totalPoints; i++) {
         let p = points[i];
 
-        // Базовая точка с учетом скролла вниз и гироскопа (на мобилках)
-        let targetOrigX = p.origX + (isMobile ? currentTiltX : 0);
-        let targetOrigY = p.origY + gridOffsetY + (isMobile ? currentTiltY : 0);
+        let baseFlowX = p.origX + (isMobile ? currentTiltX : 0);
+        let baseFlowY = p.origY + gridOffsetY + (isMobile ? currentTiltY : 0);
+
+        let targetOffsetX = 0;
+        let targetOffsetY = 0;
 
         if (!isMobile) {
-          // На ПК: притяжение к курсору + естественное движение
-          const dx = mouse.x - targetOrigX;
-          const dy = mouse.y - targetOrigY;
+          const dx = mouse.x - baseFlowX;
+          const dy = mouse.y - baseFlowY;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < mouseRadius && dist > 0) {
             const force = (1 - dist / mouseRadius) * maxPullForce;
             const angle = Math.atan2(dy, dx);
-            p.x = targetOrigX + Math.cos(angle) * force;
-            p.y = targetOrigY + Math.sin(angle) * force;
-          } else {
-            p.x += (targetOrigX - p.x) * 0.1;
-            p.y += (targetOrigY - p.y) * 0.1;
+            targetOffsetX = Math.cos(angle) * force;
+            targetOffsetY = Math.sin(angle) * force;
           }
-        } else {
-          // На мобилках: плавный параллакс от гироскопа + движение вниз
-          p.x += (targetOrigX - p.x) * 0.1;
-          p.y += (targetOrigY - p.y) * 0.1;
         }
+
+        // Физика запаздывания применяется только к силе притяжения курсора
+        p.offsetX += (targetOffsetX - p.offsetX) * 0.1;
+        p.offsetY += (targetOffsetY - p.offsetY) * 0.1;
+
+        p.x = baseFlowX + p.offsetX;
+        p.y = baseFlowY + p.offsetY;
       }
 
       // Отрисовка линий сетки
@@ -494,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Горизонтальные линии
         if ((i + 1) % cols !== 0 && i + 1 < totalPoints) {
           const pRight = points[i + 1];
-          if (pRight.origY === p.origY) {
+          if (Math.abs(pRight.origY - p.origY) < 1) {
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(pRight.x, pRight.y);
           }
@@ -503,8 +512,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Вертикальные линии
         if (i + cols < totalPoints) {
           const pDown = points[i + cols];
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(pDown.x, pDown.y);
+          if (Math.abs(pDown.origX - p.origX) < 1) {
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pDown.x, pDown.y);
+          }
         }
       }
       ctx.stroke();
