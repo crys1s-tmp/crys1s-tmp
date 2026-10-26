@@ -28,7 +28,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ФОНОВАЯ СЕТКА САЙТА (ПОВОРОТ 10°, ДВИЖЕНИЕ ВНИЗ И ПАРАЛЛАКС) */
+/* ФОНОВАЯ СЕТКА САЙТА С ИНТЕРАКТИВНЫМ ЗАТУХАНИЕМ У КУРСОРУ */
 .site-grid-bg {
   position: fixed;
   inset: -200px;
@@ -39,9 +39,21 @@ html, body {
   background-size: 50px 50px;
   pointer-events: none;
   transform: rotate(10deg) scale(1.6);
-  animation: grid-flow 15s linear infinite;
   will-change: background-position, transform;
-  transition: transform 0.1s ease-out;
+  
+  /* Создаем динамическую маску, которая управляется через JS переменные */
+  -webkit-mask-image: radial-gradient(
+    circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    black 100%
+  );
+  mask-image: radial-gradient(
+    circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    black 100%
+  );
 }
 
 @keyframes grid-flow {
