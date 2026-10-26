@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentTrackIndex = -1;
 
-  // --- ЖИВЫЕ ЧАСЫ В ТЕРМИНАЛЬНОМ HUD ---
+  // --- ЖИВЫЕ ЧАСЫ В ТЕРМИНАЛЬНОМ НUD ---
   const hudTime = document.getElementById("hud-time");
   if (hudTime) {
     function updateHudTime() {
