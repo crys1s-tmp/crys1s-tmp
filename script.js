@@ -361,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ФИЗИКОЙ ПРИТЯЖЕНИЯ К КУРСОРУ ---
+  // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ПОТОКОМ, ГИРОСКОПОМ И ПРИТЯЖЕНИЕМ ---
   const gridCanvas = document.getElementById("interactive-grid-canvas");
   if (gridCanvas) {
     const ctx = gridCanvas.getContext("2d");
@@ -374,20 +375,27 @@ document.addEventListener("DOMContentLoaded", () => {
       initGrid();
     });
 
-    const spacing = 45;       // Шаг сетки
-    const mouseRadius = 90;   // Компактное поле притяжения (в 1.5 раза меньше)
-    const maxPullForce = 25;  // Сила притяжения узлов к курсору
+    const spacing = 50;
+    const mouseRadius = 110;
+    const maxPullForce = 25;
 
     let mouse = { x: -1000, y: -1000 };
     let points = [];
+    let gridOffsetY = 0; // Переменная для естественного движения сетки вниз
+
+    // Переменные для гироскопа на мобильных
+    let tiltOffsetX = 0;
+    let tiltOffsetY = 0;
+    let currentTiltX = 0;
+    let currentTiltY = 0;
 
     function initGrid() {
       points = [];
-      const cols = Math.ceil(width / spacing) + 4;
-      const rows = Math.ceil(height / spacing) + 4;
+      const cols = Math.ceil(width / spacing) + 6;
+      const rows = Math.ceil(height / spacing) + 6;
 
-      for (let r = -2; r < rows; r++) {
-        for (let c = -2; c < cols; c++) {
+      for (let r = -3; r < rows; r++) {
+        for (let c = -3; c < cols; c++) {
           const origX = c * spacing;
           const origY = r * spacing;
           points.push({
@@ -400,7 +408,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    if (window.matchMedia("(pointer: fine)").matches) {
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
+    if (!isMobile) {
+      // События мыши только для ПК
       window.addEventListener("mousemove", (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
@@ -410,37 +421,72 @@ document.addEventListener("DOMContentLoaded", () => {
         mouse.x = -1000;
         mouse.y = -1000;
       });
+    } else {
+      // События гироскопа для мобильных устройств
+      window.addEventListener("deviceorientation", (e) => {
+        let gamma = e.gamma || 0; // Наклон влево-вправо
+        let beta = e.beta || 0;   // Наклон вперед-назад
+
+        gamma = Math.max(-45, Math.min(45, gamma));
+        beta = Math.max(10, Math.min(90, beta));
+
+        tiltOffsetX = gamma * 1.2;
+        tiltOffsetY = (beta - 45) * 1.2;
+      });
     }
 
     function animateGrid() {
       ctx.clearRect(0, 0, width, height);
 
+      // Плавное естественное движение сетки вниз
+      gridOffsetY += 0.35;
+      if (gridOffsetY >= spacing) {
+        gridOffsetY = 0;
+      }
+
+      // Сглаживание наклона для мобильных
+      if (isMobile) {
+        currentTiltX += (tiltOffsetX - currentTiltX) * 0.1;
+        currentTiltY += (tiltOffsetY - currentTiltY) * 0.1;
+      }
+
       ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
       ctx.lineWidth = 1;
 
-      // Расчет гравитационного притяжения к курсору
-      for (let p of points) {
-        const dx = mouse.x - p.origX;
-        const dy = mouse.y - p.origY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+      const cols = Math.ceil(width / spacing) + 6;
+      const totalPoints = points.length;
 
-        if (dist < mouseRadius && dist > 0) {
-          const force = (1 - dist / mouseRadius) * maxPullForce;
-          const angle = Math.atan2(dy, dx);
+      // Расчет позиций точек с учетом физики и потока
+      for (let i = 0; i < totalPoints; i++) {
+        let p = points[i];
 
-          p.x = p.origX + Math.cos(angle) * force;
-          p.y = p.origY + Math.sin(angle) * force;
+        // Базовая точка с учетом скролла вниз и гироскопа (на мобилках)
+        let targetOrigX = p.origX + (isMobile ? currentTiltX : 0);
+        let targetOrigY = p.origY + gridOffsetY + (isMobile ? currentTiltY : 0);
+
+        if (!isMobile) {
+          // На ПК: притяжение к курсору + естественное движение
+          const dx = mouse.x - targetOrigX;
+          const dy = mouse.y - targetOrigY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < mouseRadius && dist > 0) {
+            const force = (1 - dist / mouseRadius) * maxPullForce;
+            const angle = Math.atan2(dy, dx);
+            p.x = targetOrigX + Math.cos(angle) * force;
+            p.y = targetOrigY + Math.sin(angle) * force;
+          } else {
+            p.x += (targetOrigX - p.x) * 0.1;
+            p.y += (targetOrigY - p.y) * 0.1;
+          }
         } else {
-          // Плавный возврат на исходную точку
-          p.x += (p.origX - p.x) * 0.1;
-          p.y += (p.origY - p.y) * 0.1;
+          // На мобилках: плавный параллакс от гироскопа + движение вниз
+          p.x += (targetOrigX - p.x) * 0.1;
+          p.y += (targetOrigY - p.y) * 0.1;
         }
       }
 
       // Отрисовка линий сетки
-      const cols = Math.ceil(width / spacing) + 4;
-      const totalPoints = points.length;
-
       ctx.beginPath();
       for (let i = 0; i < totalPoints; i++) {
         const p = points[i];
