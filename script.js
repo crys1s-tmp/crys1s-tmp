@@ -363,44 +363,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Параллакс сетки: для ПК — от мыши, для Android — от наклона (с защитой от скачков и сглаживанием)
   if (window.matchMedia('(pointer: fine)').matches) {
-    const gridBg = document.querySelector('.site-grid-bg');
-    if (gridBg) {
-      window.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 40;
-        const y = (e.clientY / window.innerHeight - 0.5) * 40;
-        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${x}px, ${y}px)`;
-      });
-    }
-  } else {
-    const isMobileDevice = window.matchMedia('(pointer: coarse)').matches;
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const gridBg = document.querySelector('.site-grid-bg');
+  if (gridBg) {
+    window.addEventListener('mousemove', (e) => {
+      // 1. Управляем координатами для радиальной маски затухания
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
 
-    if (isMobileDevice && !isIOSDevice) {
-      let currentTiltX = 0;
-      let currentTiltY = 0;
-
-      window.addEventListener('deviceorientation', (e) => {
-        const gridBg = document.querySelector('.site-grid-bg');
-        if (!gridBg) return;
-
-        let gamma = e.gamma || 0;
-        let beta = e.beta || 0;
-
-        gamma = Math.max(-45, Math.min(45, gamma));
-        beta = Math.max(10, Math.min(90, beta));
-
-        const targetX = gamma * 1.5;
-        const targetY = (beta - 45) * 1.5;
-
-        currentTiltX += (targetX - currentTiltX) * 0.15;
-        currentTiltY += (targetY - currentTiltY) * 0.15;
-
-        gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${currentTiltX}px, ${currentTiltY}px)`;
-      });
-    }
+      // 2. Управляем параллакс-смещением сетки
+      const x = (e.clientX / window.innerWidth - 0.5) * 40;
+      const y = (e.clientY / window.innerHeight - 0.5) * 40;
+      gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${x}px, ${y}px)`;
+    });
   }
+} else {
+  // Логика наклона для Android остается без изменений
+  const isMobileDevice = window.matchMedia('(pointer: coarse)').matches;
+  const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isMobileDevice && !isIOSDevice) {
+    let currentTiltX = 0;
+    let currentTiltY = 0;
+
+    window.addEventListener('deviceorientation', (e) => {
+      const gridBg = document.querySelector('.site-grid-bg');
+      if (!gridBg) return;
+
+      let gamma = e.gamma || 0;
+      let beta = e.beta || 0;
+
+      gamma = Math.max(-45, Math.min(45, gamma));
+      beta = Math.max(10, Math.min(90, beta));
+
+      const targetX = gamma * 1.5;
+      const targetY = (beta - 45) * 1.5;
+
+      currentTiltX += (targetX - currentTiltX) * 0.15;
+      currentTiltY += (targetY - currentTiltY) * 0.15;
+
+      gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${currentTiltX}px, ${currentTiltY}px)`;
+    });
+  }
+}
   // --- НАСТОЯЩИЙ АНАЛИЗАТОР МУЗЫКИ (WEB AUDIO API) ---
   let audioCtx = null;
   let analyser = null;
