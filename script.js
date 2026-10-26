@@ -157,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setVolume(5);
     playRandomTrack();
 
-    // Запуск Web Audio API анализатора после взаимодействия пользователя
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
@@ -252,8 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (currentTime - lastSendTime < cooldownTime) {
         const timeLeftSec = Math.ceil((cooldownTime - (currentTime - lastSendTime)) / 1000);
-        
-        // Автоматический перевод в минуты и секунды
         const minutes = Math.floor(timeLeftSec / 60);
         const seconds = timeLeftSec % 60;
         const timeString = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
@@ -363,50 +360,117 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (window.matchMedia('(pointer: fine)').matches) {
-  const gridBg = document.querySelector('.site-grid-bg');
-  if (gridBg) {
-    window.addEventListener('mousemove', (e) => {
-      // 1. Управляем координатами для радиальной маски затухания
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+  // --- ИНТЕРАКТИВНАЯ КАНВАС-СЕТКА С ФИЗИКОЙ ПРИТЯЖЕНИЯ К КУРСОРУ ---
+  const gridCanvas = document.getElementById("interactive-grid-canvas");
+  if (gridCanvas) {
+    const ctx = gridCanvas.getContext("2d");
 
-      // 2. Управляем параллакс-смещением сетки
-      const x = (e.clientX / window.innerWidth - 0.5) * 40;
-      const y = (e.clientY / window.innerHeight - 0.5) * 40;
-      gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${x}px, ${y}px)`;
+    let width = (gridCanvas.width = window.innerWidth);
+    let height = (gridCanvas.height = window.innerHeight);
+
+    window.addEventListener("resize", () => {
+      width = gridCanvas.width = window.innerWidth;
+      height = gridCanvas.height = window.innerHeight;
+      initGrid();
     });
+
+    const spacing = 45;       // Шаг сетки
+    const mouseRadius = 90;   // Компактное поле притяжения (в 1.5 раза меньше)
+    const maxPullForce = 25;  // Сила притяжения узлов к курсору
+
+    let mouse = { x: -1000, y: -1000 };
+    let points = [];
+
+    function initGrid() {
+      points = [];
+      const cols = Math.ceil(width / spacing) + 4;
+      const rows = Math.ceil(height / spacing) + 4;
+
+      for (let r = -2; r < rows; r++) {
+        for (let c = -2; c < cols; c++) {
+          const origX = c * spacing;
+          const origY = r * spacing;
+          points.push({
+            origX: origX,
+            origY: origY,
+            x: origX,
+            y: origY
+          });
+        }
+      }
+    }
+
+    if (window.matchMedia("(pointer: fine)").matches) {
+      window.addEventListener("mousemove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      window.addEventListener("mouseleave", () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+      });
+    }
+
+    function animateGrid() {
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.lineWidth = 1;
+
+      // Расчет гравитационного притяжения к курсору
+      for (let p of points) {
+        const dx = mouse.x - p.origX;
+        const dy = mouse.y - p.origY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouseRadius && dist > 0) {
+          const force = (1 - dist / mouseRadius) * maxPullForce;
+          const angle = Math.atan2(dy, dx);
+
+          p.x = p.origX + Math.cos(angle) * force;
+          p.y = p.origY + Math.sin(angle) * force;
+        } else {
+          // Плавный возврат на исходную точку
+          p.x += (p.origX - p.x) * 0.1;
+          p.y += (p.origY - p.y) * 0.1;
+        }
+      }
+
+      // Отрисовка линий сетки
+      const cols = Math.ceil(width / spacing) + 4;
+      const totalPoints = points.length;
+
+      ctx.beginPath();
+      for (let i = 0; i < totalPoints; i++) {
+        const p = points[i];
+
+        // Горизонтальные линии
+        if ((i + 1) % cols !== 0 && i + 1 < totalPoints) {
+          const pRight = points[i + 1];
+          if (pRight.origY === p.origY) {
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pRight.x, pRight.y);
+          }
+        }
+
+        // Вертикальные линии
+        if (i + cols < totalPoints) {
+          const pDown = points[i + cols];
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(pDown.x, pDown.y);
+        }
+      }
+      ctx.stroke();
+
+      requestAnimationFrame(animateGrid);
+    }
+
+    initGrid();
+    animateGrid();
   }
-} else {
-  // Логика наклона для Android остается без изменений
-  const isMobileDevice = window.matchMedia('(pointer: coarse)').matches;
-  const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  if (isMobileDevice && !isIOSDevice) {
-    let currentTiltX = 0;
-    let currentTiltY = 0;
-
-    window.addEventListener('deviceorientation', (e) => {
-      const gridBg = document.querySelector('.site-grid-bg');
-      if (!gridBg) return;
-
-      let gamma = e.gamma || 0;
-      let beta = e.beta || 0;
-
-      gamma = Math.max(-45, Math.min(45, gamma));
-      beta = Math.max(10, Math.min(90, beta));
-
-      const targetX = gamma * 1.5;
-      const targetY = (beta - 45) * 1.5;
-
-      currentTiltX += (targetX - currentTiltX) * 0.15;
-      currentTiltY += (targetY - currentTiltY) * 0.15;
-
-      gridBg.style.transform = `rotate(10deg) scale(1.6) translate(${currentTiltX}px, ${currentTiltY}px)`;
-    });
-  }
-}
-  // --- НАСТОЯЩИЙ АНАЛИЗАТОР МУЗЫКИ (WEB AUDIO API) ---
+  // --- АНАЛИЗАТОР МУЗЫКИ (WEB AUDIO API) ---
   let audioCtx = null;
   let analyser = null;
   let dataArray = null;
@@ -423,7 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
       source.connect(analyser);
       analyser.connect(audioCtx.destination);
 
-      analyser.fftSize = 128; // Больше точек для плавной сетки (64 частотных бина)
+      analyser.fftSize = 128;
       dataArray = new Uint8Array(analyser.frequencyBinCount);
       isSourceConnected = true;
 
@@ -443,47 +507,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalSpans = spans.length;
 
     spans.forEach((span, index) => {
-      // Равномерно распределяем полоски по спектру (отсекая пустые высокие частоты)
       const dataIndex = Math.floor((index / totalSpans) * (dataArray.length * 0.75));
       const val = dataArray[dataIndex];
       const heightPercent = Math.max(10, (val / 255) * 100);
       span.style.height = `${heightPercent}%`;
     });
   }
+
   function parseUserAgent(ua) {
-  if (!ua || ua === "Unknown") return "❓ Unknown Device";
+    if (!ua || ua === "Unknown") return "❓ Unknown Device";
 
-  let os = "Unknown OS";
-  let icon = "💻";
+    let os = "Unknown OS";
+    let icon = "💻";
 
-  // ОС и тип устройства
-  if (/android/i.test(ua)) {
-    os = "Android";
-    icon = "📱";
-  } else if (/iphone|ipad|ipod/i.test(ua)) {
-    os = "iOS";
-    icon = "📱";
-  } else if (/windows nt 10\.0/i.test(ua)) {
-    os = "Windows 10/11";
-    icon = "🖥️";
-  } else if (/windows nt 6\.1/i.test(ua)) {
-    os = "Windows 7";
-    icon = "🖥️";
-  } else if (/mac os x/i.test(ua)) {
-    os = "macOS";
-    icon = "💻";
-  } else if (/linux/i.test(ua)) {
-    os = "Linux";
-    icon = "🐧";
+    if (/android/i.test(ua)) {
+      os = "Android";
+      icon = "📱";
+    } else if (/iphone|ipad|ipod/i.test(ua)) {
+      os = "iOS";
+      icon = "📱";
+    } else if (/windows nt 10\.0/i.test(ua)) {
+      os = "Windows 10/11";
+      icon = "🖥️";
+    } else if (/windows nt 6\.1/i.test(ua)) {
+      os = "Windows 7";
+      icon = "🖥️";
+    } else if (/mac os x/i.test(ua)) {
+      os = "macOS";
+      icon = "💻";
+    } else if (/linux/i.test(ua)) {
+      os = "Linux";
+      icon = "🐧";
+    }
+
+    let browser = "";
+    if (/edg/i.test(ua)) browser = "Edge";
+    else if (/chrome|crios/i.test(ua)) browser = "Chrome";
+    else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
+    else if (/safari/i.test(ua)) browser = "Safari";
+
+    return `${icon} ${os}${browser ? ` (${browser})` : ""}`;
   }
-
-  // Определение браузера (опционально)
-  let browser = "";
-  if (/edg/i.test(ua)) browser = "Edge";
-  else if (/chrome|crios/i.test(ua)) browser = "Chrome";
-  else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
-  else if (/safari/i.test(ua)) browser = "Safari";
-
-  return `${icon} ${os}${browser ? ` (${browser})` : ""}`;
-}
 });
