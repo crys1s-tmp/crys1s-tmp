@@ -41,17 +41,17 @@ html, body {
   transform: rotate(10deg) scale(1.6);
   will-change: background-position, transform;
   
-  /* Создаем динамическую маску, которая управляется через JS переменные */
+  /* Эффект выжигания сетки курсором */
   -webkit-mask-image: radial-gradient(
     circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
     transparent 0%,
-    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.15) 60%,
     black 100%
   );
   mask-image: radial-gradient(
     circle 220px at var(--mouse-x, 50%) var(--mouse-y, 50%),
     transparent 0%,
-    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.15) 60%,
     black 100%
   );
 }
