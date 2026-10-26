@@ -445,4 +445,40 @@ document.addEventListener("DOMContentLoaded", () => {
       span.style.height = `${heightPercent}%`;
     });
   }
+  function parseUserAgent(ua) {
+  if (!ua || ua === "Unknown") return "❓ Unknown Device";
+
+  let os = "Unknown OS";
+  let icon = "💻";
+
+  // ОС и тип устройства
+  if (/android/i.test(ua)) {
+    os = "Android";
+    icon = "📱";
+  } else if (/iphone|ipad|ipod/i.test(ua)) {
+    os = "iOS";
+    icon = "📱";
+  } else if (/windows nt 10\.0/i.test(ua)) {
+    os = "Windows 10/11";
+    icon = "🖥️";
+  } else if (/windows nt 6\.1/i.test(ua)) {
+    os = "Windows 7";
+    icon = "🖥️";
+  } else if (/mac os x/i.test(ua)) {
+    os = "macOS";
+    icon = "💻";
+  } else if (/linux/i.test(ua)) {
+    os = "Linux";
+    icon = "🐧";
+  }
+
+  // Определение браузера (опционально)
+  let browser = "";
+  if (/edg/i.test(ua)) browser = "Edge";
+  else if (/chrome|crios/i.test(ua)) browser = "Chrome";
+  else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
+  else if (/safari/i.test(ua)) browser = "Safari";
+
+  return `${icon} ${os}${browser ? ` (${browser})` : ""}`;
+}
 });
