@@ -360,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- ИНТЕРАКТИВНАЯ КВАДРАТНАЯ СЕТКА (10°): ПОТОК ВНИЗ + СИЛЬНЫЙ ПАРАЛЛАКС ОТ МЫШИ ---
+  // --- ИНТЕРАКТИВНАЯ КВАДРАТНАЯ СЕТКА (10°): БЕСКОНЕЧНЫЙ ПОТОК ВНИЗ + ПАРАЛЛАКС ---
   const gridCanvas = document.getElementById("interactive-grid-canvas");
   if (gridCanvas) {
     const ctx = gridCanvas.getContext("2d");
@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
       initGrid();
     });
 
-    const spacing = 85; // Крупная сетка (+30%)
+    const spacing = 85; // Крупная сетка
     const gridAngle = 10 * (Math.PI / 180); // Поворот ровно на 10 градусов
 
     let points = [];
@@ -388,14 +388,15 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentParallaxY = 0;
 
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    // Исключаем iOS, чтобы браузер не запрашивал разрешения на датчики движения
+    // Защита для iOS (iPhone / iPad) от запросов разрешений на гироскоп
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     function initGrid() {
       points = [];
-      cols = Math.ceil(width / spacing) + 12;
-      rows = Math.ceil(height / spacing) + 12;
+      // Увеличили запас рядов и колонок, чтобы при повороте и параллаксе края никогда не обнажались
+      cols = Math.ceil(width / spacing) + 16;
+      rows = Math.ceil(height / spacing) + 16;
 
       const startC = -Math.floor(cols / 2);
       const startR = -Math.floor(rows / 2);
@@ -413,13 +414,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!isMobile) {
-      // Параллакс от движения мыши на ПК (увеличен в 2 раза — амплитуда 80)
+      // Параллакс от движения мыши на ПК (амплитуда 80)
       window.addEventListener("mousemove", (e) => {
         const normX = (e.clientX - width / 2) / (width / 2);
         const normY = (e.clientY - height / 2) / (height / 2);
         
-        targetParallaxX = normX * 55;
-        targetParallaxY = normY * 55;
+        targetParallaxX = normX * 80;
+        targetParallaxY = normY * 80;
       });
 
       window.addEventListener("mouseleave", () => {
@@ -443,16 +444,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function animateGrid() {
       ctx.clearRect(0, 0, width, height);
 
-      // Бесконечное плавное движение сетки вниз на всех устройствах
-      gridOffsetY += 0.1;
+      // Медленное и плавное движение сетки вниз (скорость уменьшена до 0.15)
+      gridOffsetY += 0.15;
       if (gridOffsetY >= spacing) {
-        gridOffsetY -= spacing;
-        for (let i = 0; i < points.length; i++) {
-          points[i].origY += spacing;
-        }
+        gridOffsetY -= spacing; // Бесшовный циклический сброс без уплывания точек
       }
 
-      // Плавная интерполяция (амортизация) смещения параллакса
+      // Плавная амортизация параллакса
       currentParallaxX += (targetParallaxX - currentParallaxX) * 0.08;
       currentParallaxY += (targetParallaxY - currentParallaxY) * 0.08;
 
@@ -465,7 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.rotate(gridAngle);
       ctx.translate(-width / 2, -height / 2);
 
-      // Обновление координат точек сетки
+      // Обновление координат точек с учетом смещения и потока
       for (let i = 0; i < points.length; i++) {
         let p = points[i];
         p.x = cx + p.origX;
